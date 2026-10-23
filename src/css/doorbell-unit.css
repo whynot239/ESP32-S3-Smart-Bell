@@ -1,0 +1,440 @@
+/* ==========================================================================
+   DOORBELL HARDWARE UNIT SIMULATOR & PORCH VIEW
+   Sleek Anodized Obsidian Glass Doorbell Hardware Unit & Controls
+   ========================================================================== */
+
+.doorbell-porch-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.doorbell-hardware-card {
+  background: radial-gradient(circle at 50% 20%, #171b26 0%, #0d1017 100%);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Doorbell Physical Casing */
+.doorbell-unit-chassis {
+  width: 240px;
+  background: linear-gradient(180deg, #1e2430 0%, #10141c 100%);
+  border-radius: 40px;
+  border: 2px solid #2f3849;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.8),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+
+/* Camera Lens Module */
+.doorbell-lens-assembly {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #1e293b 0%, #090d14 70%, #000 100%);
+  border: 3px solid #334155;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(0, 0, 0, 0.9);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lens-glass-reflection {
+  position: absolute;
+  width: 45px;
+  height: 25px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+  top: 14px;
+  left: 18px;
+  transform: rotate(-25deg);
+  pointer-events: none;
+}
+
+.lens-sensor-core {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #020617;
+  border: 2px solid #1e3a8a;
+  box-shadow: inset 0 0 6px #3b82f6;
+}
+
+/* IR Emitters around lens */
+.ir-emitter {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #334155;
+  transition: var(--transition-fast);
+}
+
+.ir-emitter.active {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+.ir-top { top: 6px; }
+.ir-bottom { bottom: 6px; }
+.ir-left { left: 6px; }
+.ir-right { right: 6px; }
+
+/* Speaker Grille & Mic */
+.doorbell-speaker-grille {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.speaker-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #475569;
+}
+
+.doorbell-mic-hole {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #000;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
+}
+
+/* PHYSICAL BELL RING BUTTON */
+.doorbell-ring-button-container {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-physical-ring {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #2a3447 0%, #111520 100%);
+  border: 3px solid #475569;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.btn-physical-ring:hover {
+  border-color: #60a5fa;
+  transform: scale(1.03);
+}
+
+.btn-physical-ring:active, .btn-physical-ring.pressed {
+  transform: scale(0.94);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), inset 0 2px 8px rgba(0, 0, 0, 0.8);
+  border-color: #3b82f6;
+}
+
+/* Glowing LED Halo Ring */
+.led-halo-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid #3b82f6;
+  opacity: 0.6;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  transition: var(--transition-normal);
+  pointer-events: none;
+}
+
+.btn-physical-ring.ringing .led-halo-ring {
+  border-color: #10b981;
+  opacity: 1;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.9), inset 0 0 10px rgba(16, 185, 129, 0.5);
+  animation: halo-pulse 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes halo-pulse {
+  from { transform: scale(0.98); opacity: 0.7; }
+  to { transform: scale(1.08); opacity: 1; }
+}
+
+.ring-hint-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+/* Hardware Quick Controls & Scene Switcher */
+.porch-controls-panel {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.controls-row-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preset-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.btn-preset-scene {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-preset-scene:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.btn-preset-scene.active {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #3b82f6;
+  color: #93c5fd;
+}
+
+.action-triggers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.btn-trigger-action {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-trigger-action:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================================================
+   DUAL-RELAY HARDWARE SIMULATOR & ESP32 TELEMETRY HUD
+   ========================================================================== */
+
+.hardware-relays-card {
+  width: 100%;
+  background: rgba(14, 18, 28, 0.85);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  backdrop-filter: blur(14px);
+}
+
+.hardware-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.relay-card {
+  background: rgba(22, 28, 44, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: var(--transition-normal);
+}
+
+.relay-card.active-chime {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.12);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.relay-card.active-burst {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.14);
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
+  animation: electric-border 0.3s infinite alternate;
+}
+
+@keyframes electric-border {
+  0% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+  100% { box-shadow: 0 0 30px rgba(245, 158, 11, 0.6); }
+}
+
+.relay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.relay-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.relay-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #475569;
+  box-shadow: none;
+  transition: var(--transition-fast);
+}
+
+.relay-led.led-chime-on {
+  background: #3b82f6;
+  box-shadow: 0 0 12px #3b82f6, 0 0 24px #3b82f6;
+}
+
+.relay-led.led-burst-on {
+  background: #f59e0b;
+  box-shadow: 0 0 14px #f59e0b, 0 0 28px #f59e0b;
+}
+
+.relay-name {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+}
+
+.relay-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.relay-status-pill {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  transition: var(--transition-fast);
+}
+
+.relay-status-pill.status-chime-active {
+  background: rgba(59, 130, 246, 0.25);
+  color: #93c5fd;
+  border: 1px solid #3b82f6;
+}
+
+.relay-status-pill.status-burst-active {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fde68a;
+  border: 1px solid #f59e0b;
+}
+
+.relay-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.relay-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #3b82f6;
+  border-radius: var(--radius-full);
+  transition: width 0.05s linear;
+}
+
+.relay-progress-fill.burst {
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+}
+
+.hardware-pins-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.pin-pill {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pin-label {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.pin-val {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+

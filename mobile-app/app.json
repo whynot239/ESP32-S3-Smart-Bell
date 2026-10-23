@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "Smart Doorbell",
+    "slug": "smart-doorbell-app",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "plugins": [
+      "@config-plugins/react-native-webrtc",
+      "expo-dev-client",
+      "expo-notifications"
+    ],
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#07090e"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.homeassistant.smartdoorbell",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allows the app to display live camera feeds and participate in 2-way video intercom.",
+        "NSMicrophoneUsageDescription": "Allows 2-way audio communication with visitors at your front door."
+      },
+      "bitcode": false
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#07090e"
+      },
+      "package": "com.homeassistant.smartdoorbell",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "VIBRATE",
+        "WAKE_LOCK",
+        "ACCESS_NETWORK_STATE",
+        "ACCESS_WIFI_STATE",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.CAMERA",
+        "android.permission.INTERNET",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WAKE_LOCK",
+        "android.permission.BLUETOOTH",
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "883b01ec-2fec-4b2e-bb75-c3c5fd67ede1"
+      }
+    }
+  }
+}

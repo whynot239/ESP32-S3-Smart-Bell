@@ -1,0 +1,227 @@
+/* ==========================================================================
+   HOME ASSISTANT OS DASHBOARD & ENTITY TELEMETRY STYLES
+   ========================================================================== */
+
+.ha-panel-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ha-status-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ha-connection-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.ha-conn-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ha-conn-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.ha-conn-sub {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* WiFi Network Toggle Simulation */
+.wifi-toggle-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wifi-info-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wifi-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.wifi-detail {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.btn-toggle-wifi {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-toggle-wifi:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+/* Live HAOS Entity List */
+.ha-entities-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ha-entities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ha-entity-row {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: var(--transition-fast);
+}
+
+.ha-entity-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ha-entity-name-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ha-entity-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ha-entity-id {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.ha-entity-state-pill {
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+}
+
+.ha-entity-state-pill.state-on, .ha-entity-state-pill.state-streaming, .ha-entity-state-pill.state-unlocked {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.ha-entity-state-pill.state-ringing {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  color: #93c5fd;
+  animation: pulse-ring-expand 1.2s infinite;
+}
+
+/* Event Logs Panel */
+.ha-event-logs-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logs-scroll-area {
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.logs-scroll-area::-webkit-scrollbar {
+  width: 5px;
+}
+
+.logs-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--border-glass);
+  border-radius: 4px;
+}
+
+.log-entry-item {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.log-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.log-time {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.log-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.log-badge {
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+}

@@ -1,0 +1,13 @@
+node_modules/
+mobile-app/node_modules/
+mobile-app/.expo/
+dist/
+captures/
+.env
+firmware/esp32_cam_doorbell/include/secrets.h
+
+# PlatformIO build and local toolchain cache
+firmware/esp32_cam_doorbell/.pio/
+firmware/esp32_cam_doorbell/.platformio-core/
+
+/data/

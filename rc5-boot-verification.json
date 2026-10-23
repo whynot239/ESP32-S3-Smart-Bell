@@ -1,0 +1,22 @@
+{
+  "rc5_boot": true,
+  "rfid_disable_saved": true,
+  "reader_ready": true,
+  "websocket_connected": true,
+  "filtered_boot": [
+    "[   218][I][esp32-hal-psram.c:96] psramInit(): PSRAM enabled",
+    "Firmware: v3.1.0-rc5 | Hardware: GOOUUU-ESP32-S3-CAM-N16R8",
+    "\u2705 [STORAGE] LittleFS mounted successfully.",
+    "\u2705 [STORAGE] Loaded 1 authorized NFC cards from LittleFS.",
+    "[CAMERA] Sensor PID: 0x3660, PSRAM: 8386103 bytes",
+    "\u2705 [CAMERA] GOOUUU ESP32-S3 Camera optical system online.",
+    "\u2705 [NFC] RC522 Reader ready on SPI (Firmware Version: 0x92).",
+    "[RFID] Protected-sector authorization required. UID-only registrations cannot unlock.",
+    "\u2705 [API] Network Services & WebSocket Engine started.",
+    "[RFID] Card access disable: SAVED. Protected credentials are always required.",
+    "[RFID INSPECT] Ended; normal access handling restored.",
+    "\u2705 [WEBSOCKET] Connected to Backend Server!"
+  ],
+  "card_enrollment_performed": false,
+  "gate_operation_tested": false
+}

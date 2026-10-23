@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Video Doorbell — Home Assistant Ecosystem</title>
+  <meta name="description" content="State-of-the-art smart video doorbell system with live background camera feed incoming call, 2-way intercom, smart gate unlock, and Home Assistant OS integration.">
+  
+  <!-- Modern Stylesheets -->
+  <link rel="stylesheet" href="src/css/style.css">
+  <link rel="stylesheet" href="src/css/mobile-app.css">
+  <link rel="stylesheet" href="src/css/doorbell-unit.css">
+  <link rel="stylesheet" href="src/css/ha-dashboard.css">
+</head>
+<body>
+
+  <!-- Top App Navigation Bar -->
+  <header class="app-header">
+    <div class="brand-badge">
+      <div class="brand-logo" data-icon="bellRing"></div>
+      <div>
+        <div class="brand-title">
+          AURA SMART BELL
+          <span class="ha-tag">HAOS CONNECTED</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-status-bar">
+      <div class="status-chip active" style="border-color: #3b82f6; background: rgba(59, 130, 246, 0.12);">
+        <span class="status-dot" style="background: #3b82f6; box-shadow: 0 0 10px #3b82f6;"></span>
+        <span style="color: #93c5fd;">Phone Link: <strong>192.168.10.101:3000</strong></span>
+      </div>
+      <div class="status-chip active">
+        <span class="status-dot"></span>
+        <span>Hub Online (WebSocket Sync)</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btn-quick-help" onclick="alert('📱 HOW PHONE + WEBSITE SYNC WORKS:\n\n1. Run the app on your phone via Expo Go\n2. The phone automatically connects to this PC at http://192.168.10.101:3000\n3. Click the physical RING button on this website\n4. Your mobile phone will immediately ring with notification and vibration!\n5. Tap Answer on your phone to see the live camera feed\n6. Tap OPEN DOOR on your phone: Relay 2 on this website triggers an instant 1000ms current burst!')">
+        <span data-icon="sparkles"></span>
+        <span>Phone Setup & Test</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Master Interactive Workbench -->
+  <main class="workbench-container">
+
+    <!-- ========================================================================= -->
+    <!-- PANEL 1: DOORBELL HARDWARE SIMULATOR (PORCH UNIT) -->
+    <!-- ========================================================================= -->
+    <section class="glass-panel doorbell-porch-wrapper">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span data-icon="camera"></span>
+          <span>Porch Doorbell Unit</span>
+        </div>
+        <span class="ha-tag">HARDWARE SIM</span>
+      </div>
+
+      <div class="doorbell-hardware-card">
+        <!-- Physical Doorbell Enclosure -->
+        <div class="doorbell-unit-chassis">
+          <!-- Camera Lens Optical Module -->
+          <div class="doorbell-lens-assembly">
+            <div class="lens-glass-reflection"></div>
+            <div class="lens-sensor-core"></div>
+            
+            <!-- IR Night Vision LEDs -->
+            <div class="ir-emitter ir-top"></div>
+            <div class="ir-emitter ir-bottom"></div>
+            <div class="ir-emitter ir-left"></div>
+            <div class="ir-emitter ir-right"></div>
+          </div>
+
+          <!-- Pinhole Microphone -->
+          <div class="doorbell-mic-hole" title="High-Sensitivity Noise-Canceling Microphone"></div>
+
+          <!-- Speaker Grille -->
+          <div class="doorbell-speaker-grille">
+            <div class="speaker-dot"></div>
+            <div class="speaker-dot"></div>
+            <div class="speaker-dot"></div>
+            <div class="speaker-dot"></div>
+            <div class="speaker-dot"></div>
+          </div>
+
+          <!-- PHYSICAL RING BUTTON -->
+          <div class="doorbell-ring-button-container">
+            <button id="btn-physical-ring" class="btn-physical-ring" title="Press to ring doorbell">
+              <div class="led-halo-ring"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18.8 4A6.3 6.3 0 0 0 6 4"/><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            </button>
+            <span class="ring-hint-label">PRESS TO RING</span>
+          </div>
+        </div>
+
+        <!-- Porch Interactive Controls & Scene Selection -->
+        <div class="porch-controls-panel">
+          <div class="controls-row-title">
+            <span data-icon="user"></span>
+            <span>Select Visitor Scene</span>
+          </div>
+
+          <div class="preset-buttons-grid">
+            <button class="btn-preset-scene active" data-scene="courier">
+              <span data-icon="packageIcon"></span>
+              <span>Courier Delivery</span>
+            </button>
+            <button class="btn-preset-scene" data-scene="neighbor">
+              <span data-icon="user"></span>
+              <span>Neighbor</span>
+            </button>
+            <button class="btn-preset-scene" data-scene="guest">
+              <span data-icon="moon"></span>
+              <span>Evening Guest</span>
+            </button>
+            <button class="btn-preset-scene" data-scene="empty">
+              <span data-icon="home"></span>
+              <span>Empty Porch</span>
+            </button>
+          </div>
+
+          <div class="action-triggers-grid" style="margin-top: 6px;">
+            <button class="btn-trigger-action" id="btn-webcam-toggle">
+              <span data-icon="video"></span>
+              <span>Use My Webcam</span>
+            </button>
+            <button class="btn-trigger-action" id="btn-motion-trigger">
+              <span data-icon="activity"></span>
+              <span>Trigger Motion</span>
+            </button>
+            <button class="btn-trigger-action" id="btn-porch-light">
+              <span data-icon="sun"></span>
+              <span>Porch Sconce Light</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ESP32-CAM & DUAL-RELAY HARDWARE INTERFACE -->
+        <div class="hardware-relays-card">
+          <div class="hardware-card-header">
+            <div class="controls-row-title">
+              <span data-icon="cpu"></span>
+              <span>ESP32-CAM & Dual Relays</span>
+            </div>
+            <span class="ha-tag" id="esp32-status-badge">HARDWARE LINKED</span>
+          </div>
+
+          <!-- Relay 1: Inside Physical Bell Chime -->
+          <div class="relay-card" id="relay1-card">
+            <div class="relay-header">
+              <div class="relay-title-group">
+                <span class="relay-led" id="relay1-led"></span>
+                <div>
+                  <div class="relay-name">RELAY 1 (GPIO 12)</div>
+                  <div class="relay-desc">Inside Bell Chime (2.0s Pulse)</div>
+                </div>
+              </div>
+              <div class="relay-status-pill" id="relay1-status">IDLE (OFF)</div>
+            </div>
+            <div class="relay-progress-bar">
+              <div class="relay-progress-fill" id="relay1-progress"></div>
+            </div>
+          </div>
+
+          <!-- Relay 2: Gate Lock Current Burst -->
+          <div class="relay-card" id="relay2-card">
+            <div class="relay-header">
+              <div class="relay-title-group">
+                <span class="relay-led" id="relay2-led"></span>
+                <div>
+                  <div class="relay-name">RELAY 2 (GPIO 14)</div>
+                  <div class="relay-desc">Gate Lock Solenoid (1000ms Burst)</div>
+                </div>
+              </div>
+              <div class="relay-status-pill" id="relay2-status">IDLE (LOCKED)</div>
+            </div>
+            <div class="relay-progress-bar">
+              <div class="relay-progress-fill burst" id="relay2-progress"></div>
+            </div>
+          </div>
+
+          <!-- Real-Time Hardware Pin Diagnostics -->
+          <div class="hardware-pins-grid">
+            <div class="pin-pill">
+              <span class="pin-label">PIN 13 (BUTTON)</span>
+              <span class="pin-val" id="telemetry-pin-btn">HIGH (Ready)</span>
+            </div>
+            <div class="pin-pill">
+              <span class="pin-label">OV2640 CAMERA</span>
+              <span class="pin-val" id="telemetry-cam-state">STANDBY</span>
+            </div>
+            <div class="pin-pill">
+              <span class="pin-label">SNUBBER DIODE</span>
+              <span class="pin-val" style="color: #34d399;">1N4007 ACTIVE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- PANEL 2: MOBILE SMARTPHONE COMPANION APP -->
+    <!-- ========================================================================= -->
+    <section class="glass-panel" style="padding: 16px; display: flex; justify-content: center; background: transparent; border: none; box-shadow: none;">
+      <div class="mobile-phone-frame">
+        <!-- Phone Notch / Dynamic Island Area -->
+        <div class="phone-notch-area">
+          <span class="phone-clock" id="phone-clock">16:30</span>
+          <div class="phone-island-pill">
+            <div class="island-camera-lens"></div>
+          </div>
+          <div class="phone-status-icons">
+            <span data-icon="wifi"></span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        <!-- Phone Screen Container -->
+        <div class="mobile-screen-viewport">
+          <!-- Push Notification Banner Container -->
+          <div id="mobile-notification-container"></div>
+
+          <!-- ===================================================================== -->
+          <!-- SCREEN 1: INCOMING CALL OVERLAY (LIVE CAMERA BACKGROUND) -->
+          <!-- ===================================================================== -->
+          <div id="incoming-call-overlay" class="incoming-call-overlay hidden">
+            <!-- Fullscreen Live Camera Feed Canvas Background -->
+            <canvas id="incoming-call-camera-canvas" class="call-bg-camera"></canvas>
+            <div class="call-camera-gradient-overlay"></div>
+
+            <!-- Header Info -->
+            <div class="call-header-info">
+              <div class="call-device-badge">
+                <span data-icon="shield"></span>
+                <span>HOME ASSISTANT • FRONT DOOR</span>
+              </div>
+              <h2 class="call-title">Front Doorbell</h2>
+              <div class="call-status-badge">
+                <span class="status-dot"></span>
+                <span>Incoming Ringing...</span>
+              </div>
+              <div class="call-wifi-status">
+                <span data-icon="wifi"></span>
+                <span>Connected via Home_5GHz_IoT</span>
+              </div>
+            </div>
+
+            <!-- Call Answer & Decline Buttons -->
+            <div class="call-action-panel">
+              <div class="call-buttons-row">
+                <!-- Decline Button -->
+                <button id="btn-decline-call" class="btn-call-action btn-decline" title="Decline call">
+                  <div class="call-icon-circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+                  </div>
+                  <span class="call-btn-label">Decline</span>
+                </button>
+
+                <!-- Answer Button -->
+                <button id="btn-answer-call" class="btn-call-action btn-answer" title="Answer with 2-way audio">
+                  <div class="call-icon-circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  </div>
+                  <span class="call-btn-label">Answer</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===================================================================== -->
+          <!-- SCREEN 2: ACTIVE 2-WAY INTERCOM SESSION -->
+          <!-- ===================================================================== -->
+          <div id="active-intercom-view" class="active-intercom-view hidden">
+            <div class="intercom-video-container">
+              <canvas id="intercom-camera-canvas" class="intercom-main-camera"></canvas>
+
+              <!-- Header Floating HUD -->
+              <div class="intercom-header-bar">
+                <div class="call-timer-badge">
+                  <div class="timer-rec-dot"></div>
+                  <span id="call-timer-text">00:00</span>
+                </div>
+                <div class="camera-controls-mini">
+                  <button class="btn-mini-control" id="btn-night-vision-toggle" title="Toggle IR Night Vision">
+                    <span data-icon="moon"></span>
+                  </button>
+                  <button class="btn-mini-control" id="btn-flashlight-toggle" title="Toggle Porch Light">
+                    <span data-icon="sun"></span>
+                  </button>
+                  <button class="btn-mini-control" id="btn-snapshot" title="Take Snapshot">
+                    <span data-icon="camera"></span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Picture in Picture User Preview -->
+              <div class="intercom-pip-user">
+                <div class="pip-inner-avatar">
+                  <span data-icon="user"></span>
+                  <span>You (Mic)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Waveform Audio Visualizer -->
+            <div class="intercom-waveform-container">
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+            </div>
+
+            <!-- Intercom Controls Drawer -->
+            <div class="intercom-controls-drawer">
+              <!-- SMART GATE UNLOCK BUTTON ("OPEN DOOR") -->
+              <button id="btn-open-door-master" class="btn-open-door-master" title="Unlock front gate lock">
+                <div class="open-door-left">
+                  <span data-icon="unlock"></span>
+                  <div>
+                    <div style="font-size: 1rem; font-weight: 800;">OPEN DOOR / GATE</div>
+                    <div style="font-size: 0.72rem; opacity: 0.85;">Tap to unlock front gate</div>
+                  </div>
+                </div>
+                <span class="open-door-wifi-badge">
+                  <span data-icon="wifi"></span>
+                  WiFi OK
+                </span>
+              </button>
+
+              <!-- Quick Responses -->
+              <div class="quick-responses-container">
+                <div class="quick-response-label">Quick AI Voice Replies</div>
+                <div class="quick-chips-scroll">
+                  <button class="btn-quick-chip" data-reply="Please leave the package by the door. Thank you!">
+                    📦 Leave at porch
+                  </button>
+                  <button class="btn-quick-chip" data-reply="I will be there in just one minute!">
+                    ⏳ Coming in 1 min
+                  </button>
+                  <button class="btn-quick-chip" data-reply="Hello! Can I help you?">
+                    👋 Can I help you?
+                  </button>
+                  <button class="btn-quick-chip" data-reply="No thank you, please have a nice day.">
+                    🚫 Not interested
+                  </button>
+                </div>
+              </div>
+
+              <!-- Main Call Action Row -->
+              <div class="intercom-call-actions">
+                <button id="btn-toggle-mic" class="btn-intercom-circle" title="Mute/Unmute Mic">
+                  <span data-icon="mic"></span>
+                </button>
+                <button id="btn-end-intercom" class="btn-intercom-circle btn-intercom-end" title="End Call">
+                  <span data-icon="phoneOff"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===================================================================== -->
+          <!-- SCREEN 3: DEFAULT MOBILE HOME DASHBOARD -->
+          <!-- ===================================================================== -->
+          <div id="mobile-dashboard-view" class="mobile-dashboard-view">
+            <div class="mobile-dash-header">
+              <div>
+                <div class="mobile-dash-greeting">Front Entrance</div>
+                <div class="mobile-dash-sub">Home Assistant System Active</div>
+              </div>
+              <div class="status-chip active" style="padding: 4px 10px; font-size: 0.75rem;">
+                <span class="status-dot"></span>
+                <span>Standby</span>
+              </div>
+            </div>
+
+            <!-- Gate Status Widget -->
+            <div class="gate-widget-card">
+              <div class="gate-widget-top">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span data-icon="lock" style="color: #60a5fa;"></span>
+                  <span style="font-size: 0.9rem; font-weight: 700;">Front Gate Lock</span>
+                </div>
+                <div class="gate-widget-badge locked">
+                  <span id="gate-status-label">LOCKED</span>
+                </div>
+              </div>
+              <button id="btn-quick-gate-dash" class="gate-quick-btn">
+                <span data-icon="unlock"></span>
+                <span>Open Door / Gate</span>
+              </button>
+            </div>
+
+            <!-- Activity List -->
+            <div class="mobile-activity-section">
+              <div class="activity-section-title">
+                <span>Recent Events</span>
+                <span data-icon="history" style="width: 16px; height: 16px;"></span>
+              </div>
+              <div id="mobile-activity-list" class="activity-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- PANEL 3: HOME ASSISTANT OS INTEGRATION & TELEMETRY -->
+    <!-- ========================================================================= -->
+    <aside class="ha-panel-column">
+      <!-- Connection & Status Card -->
+      <div class="glass-panel ha-status-card">
+        <div class="panel-header" style="padding: 0 0 14px 0;">
+          <div class="panel-title">
+            <span data-icon="server"></span>
+            <span>Home Assistant OS</span>
+          </div>
+          <span class="ha-tag">WS / REST</span>
+        </div>
+
+        <div class="ha-connection-badge">
+          <div class="ha-conn-left">
+            <span class="status-dot"></span>
+            <div>
+              <div class="ha-conn-title">Connected & Synced</div>
+              <div class="ha-conn-sub">http://homeassistant.local:8123</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WiFi Network Verification Simulator -->
+        <div class="wifi-toggle-box">
+          <div class="wifi-info-left">
+            <span data-icon="wifi" style="color: #38bdf8;"></span>
+            <div>
+              <div class="wifi-name">Local WiFi Security</div>
+              <div class="wifi-detail">Required for Door Unlock</div>
+            </div>
+          </div>
+          <button class="btn-toggle-wifi" id="btn-ha-wifi-toggle">Switch to 5G</button>
+        </div>
+
+        <!-- Live HAOS Entity List -->
+        <div class="ha-entities-section">
+          <div class="controls-row-title">
+            <span data-icon="activity"></span>
+            <span>Live Entities & States</span>
+          </div>
+
+          <div class="ha-entities-list">
+            <div class="ha-entity-row">
+              <div class="ha-entity-name-box">
+                <div class="ha-entity-title">Doorbell Ring Sensor</div>
+                <div class="ha-entity-id">binary_sensor.front_doorbell_ring</div>
+              </div>
+              <div id="entity-ring-state" class="ha-entity-state-pill">OFF</div>
+            </div>
+
+            <div class="ha-entity-row">
+              <div class="ha-entity-name-box">
+                <div class="ha-entity-title">Front Gate Smart Lock</div>
+                <div class="ha-entity-id">lock.front_gate</div>
+              </div>
+              <div id="entity-lock-state" class="ha-entity-state-pill">LOCKED</div>
+            </div>
+
+            <div class="ha-entity-row">
+              <div class="ha-entity-name-box">
+                <div class="ha-entity-title">Live Camera Stream</div>
+                <div class="ha-entity-id">camera.front_doorbell_live</div>
+              </div>
+              <div id="entity-cam-state" class="ha-entity-state-pill">IDLE</div>
+            </div>
+
+            <div class="ha-entity-row">
+              <div class="ha-entity-name-box">
+                <div class="ha-entity-title">Porch Sconce Light</div>
+                <div class="ha-entity-id">switch.porch_light</div>
+              </div>
+              <div id="entity-light-state" class="ha-entity-state-pill">OFF</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time Activity Log Card -->
+      <div class="glass-panel ha-event-logs-card">
+        <div class="logs-header">
+          <div class="panel-title">
+            <span data-icon="history"></span>
+            <span>Activity Log</span>
+          </div>
+          <button id="btn-clear-logs" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.72rem;">Clear</button>
+        </div>
+        <div id="activity-logs-list" class="logs-scroll-area"></div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ES6 App Module Script -->
+  <script type="module" src="src/js/app.js"></script>
+</body>
+</html>
