@@ -1,0 +1,21 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {createPushService} from '../push-service.js';
+test('push registration persists and invalid registrations are removed without real network calls',async()=>{
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'doorbell-push-test-'));
+  const requests=[];
+  const fakeFetch=async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>({data:[{status:'error',details:{error:'DeviceNotRegistered'}}]})};};
+  const push=createPushService(directory,'test-expo-access',fakeFetch);
+  assert.throws(()=>push.register('invalid'));
+  const token='ExpoPushToken[testing0123456789]';
+  push.register(token);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(directory,'push-tokens.json'),'utf8')),[token]);
+  await push.notify('Doorbell ringing','Visitor',{type:'ring'});
+  assert.equal(requests.length,1);
+  assert.equal(requests[0].options.headers.Authorization,'Bearer test-expo-access');
+  assert.equal(JSON.parse(requests[0].options.body)[0].to,token);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(directory,'push-tokens.json'),'utf8')),[]);
+});

@@ -1,0 +1,21 @@
+import {spawn} from 'node:child_process';
+import {WebSocket} from 'ws';
+import os from 'node:os';import fs from 'node:fs';import path from 'node:path';
+const port=process.env.PREVIEW_PORT||'19194';
+const env={...process.env,HOST:'127.0.0.1',PORT:port,SMART_BELL_PREVIEW:'1',OWNER_PIN:'987654',DEVICE_HMAC_KEY:'preview-signing-key-000000000000',DEVICE_CONNECTION_TOKEN:'preview-device-token-0000000000',MOBILE_WS_TOKEN:'preview-mobile-token-0000000000',DATA_DIR:fs.mkdtempSync(path.join(os.tmpdir(),'doorbell-preview-'))};
+const cards=[{uid:'F909F41F',name:'White card (demo)',userId:'owner',permission:'gate_access',active:true},{uid:'9A130156',name:'Blue key fob (demo)',userId:'owner',permission:'gate_access',active:true}];
+const settings={version:1,idleBrightness:8,activeBrightness:120,speakerGain:4};
+const server=spawn(process.execPath,['server.js'],{env,stdio:'inherit'});let ws,enabled=true,light='off';
+function heartbeat(){if(ws?.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'heartbeat',cardsEnabled:enabled,relayFault:false,gateLock:'locked',rssi:-58,chime:'idle',light,alarmActive:false,settings,uptimeSec:Math.floor(process.uptime()),freeHeap:128000,freePsram:7200000,pendingEvents:0,cardsCached:cards.length,storageReady:true,cameraReady:true,audioReady:true}));}
+setTimeout(()=>{ws=new WebSocket(`ws://127.0.0.1:${port}/ws?device_token=${env.DEVICE_CONNECTION_TOKEN}`);
+ws.on('open',()=>{ws.send(JSON.stringify({type:'esp32_connect',bootId:'b'.repeat(32),lastSequence:0,version:'3.1.0-rc6 (simulated)',hardware:'Local preview · simulated ESP32'}));heartbeat();
+ for(let i=0;i<12;i++)ws.send(JSON.stringify({type:'access_event',eventId:'demo-'+i,eventType:i%3===0?'doorbell_ring':i%3===1?'nfc_access':'remote_unlock',userName:i%3===0?'Visitor':'Owner (demo)',cardUid:i%3===1?'F909F41F':'REMOTE',authorized:true,method:'Preview'}));});
+ws.on('message',(raw,binary)=>{if(binary)return;const envelope=JSON.parse(raw);if(!envelope.payload)return;const command=JSON.parse(envelope.payload);
+ if(command.command==='cards_enabled')enabled=command.enabled;
+ if(command.command==='light_set')light=command.state;
+ if(command.command==='device_settings')Object.assign(settings,{version:1,idleBrightness:command.idleBrightness,activeBrightness:command.activeBrightness,speakerGain:command.speakerGain});
+ if(command.command==='get_cards')ws.send(JSON.stringify({type:'cards_snapshot',nonce:command.nonce,cards}));
+ if(command.command==='sync_cards')cards.splice(0,cards.length,...command.data.cards);
+ ws.send(JSON.stringify({type:'command_result',nonce:command.nonce,success:true}));heartbeat();});
+},1200);
+setInterval(heartbeat,10000);const stop=()=>{ws?.close();server.kill();process.exit();};process.on('SIGINT',stop);process.on('SIGTERM',stop);
