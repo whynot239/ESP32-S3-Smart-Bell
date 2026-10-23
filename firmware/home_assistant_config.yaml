@@ -1,0 +1,85 @@
+# ==============================================================================
+# HOME ASSISTANT CONFIGURATION FOR ESP32-CAM SMART DOORBELL
+# Add these YAML blocks to your Home Assistant `configuration.yaml` file
+# ==============================================================================
+
+# 1. LIVE CAMERA STREAM (ESP32-CAM MJPEG)
+camera:
+  - platform: mjpeg
+    name: Front Doorbell Live
+    still_image_url: "http://<ESP32_IP>/capture"
+    mjpeg_url: "http://<ESP32_IP>:81/stream"
+    verify_ssl: false
+
+# 2. SMART GATE LOCK (Triggers ESP32-CAM Relay on GPIO 14)
+lock:
+  - platform: template
+    name: Front Gate Smart Lock
+    value_template: "{{ is_state('input_boolean.front_gate_state', 'on') }}"
+    lock:
+      service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.front_gate_state
+    unlock:
+      - service: rest_command.unlock_front_gate
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.front_gate_state
+      - delay: "00:00:06"
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.front_gate_state
+
+# Helper boolean for gate state tracking
+input_boolean:
+  front_gate_state:
+    name: Gate Lock Status
+    initial: off
+
+# REST command to tell ESP32-CAM to unlock
+rest_command:
+  unlock_front_gate:
+    url: "http://<ESP32_IP>/unlock"
+    method: GET
+
+# 3. PORCH SCONCE / FLASH LED (GPIO 4)
+switch:
+  - platform: command_line
+    switches:
+      porch_light:
+        friendly_name: "Front Porch Sconce"
+        command_on: "curl -X POST http://<ESP32_IP>/light/toggle"
+        command_off: "curl -X POST http://<ESP32_IP>/light/toggle"
+        command_state: "curl -s http://<ESP32_IP>/status"
+        value_template: "{{ value_json.light == 'on' }}"
+
+# 4. DOORBELL RING WEBHOOK AUTOMATION
+# Triggers the Mobile App incoming call screen when physical button is pressed
+automation:
+  - alias: "Doorbell Ring Trigger"
+    trigger:
+      - platform: webhook
+        webhook_id: doorbell_ring_trigger
+        allowed_methods:
+          - POST
+          - PUT
+        local_only: true
+    action:
+      # Update Home Assistant binary sensor or notify mobile devices
+      - service: persistent_notification.create
+        data:
+          title: "🔔 Doorbell Ringing"
+          message: "Visitor at Front Porch!"
+          notification_id: "doorbell_ring"
+      - service: notify.all_devices
+        data:
+          title: "Doorbell Ring"
+          message: "Incoming call from Front Porch"
+          data:
+            channel: "Doorbell"
+            importance: "max"
+            actions:
+              - action: "ANSWER"
+                title: "Answer Call"
+              - action: "DECLINE"
+                title: "Decline"
